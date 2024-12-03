@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{2A0CBE1C-34C8-4A1E-AB0A-525C614C1C02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{2A0CBE1C-34C8-4A1E-AB0A-525C614C1C02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{838A0074-A2FE-44EF-B84A-C8FD0C078128}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BLL", "BLL\BLL.csproj", "{838A0074-A2FE-44EF-B84A-C8FD0C078128}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{B6CA73BA-6FDC-42E6-9BE3-3925F9C1B3BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{B6CA73BA-6FDC-42E6-9BE3-3925F9C1B3BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{341487BA-3279-4B2A-8B4B-430F55E328A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{B6CA73BA-6FDC-42E6-9BE3-3925F9C1B3BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6CA73BA-6FDC-42E6-9BE3-3925F9C1B3BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6CA73BA-6FDC-42E6-9BE3-3925F9C1B3BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{341487BA-3279-4B2A-8B4B-430F55E328A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{341487BA-3279-4B2A-8B4B-430F55E328A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{341487BA-3279-4B2A-8B4B-430F55E328A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{341487BA-3279-4B2A-8B4B-430F55E328A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

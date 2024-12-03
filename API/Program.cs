@@ -1,6 +1,8 @@
 
+using API.Tools;
 using BLL.Services;
 using DAL.Repositories;
+using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
@@ -15,9 +17,14 @@ namespace API {
             // Add services to the container.
             builder.Services.AddTransient<SqlConnection>(sp =>
                 new SqlConnection(builder.Configuration.GetConnectionString("default")));
+
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<RaceService>();
+
             builder.Services.AddScoped<UserRepo>();
             builder.Services.AddScoped<RunnerRepo>();
+            builder.Services.AddScoped<RaceRepo>();
+            builder.Services.AddScoped<ResultRepo>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -75,6 +82,9 @@ namespace API {
                       .WithOrigins("http://localhost:4200")
                       .AllowAnyHeader()
                       .AllowAnyMethod()));
+
+            SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+            SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());
 
             var app = builder.Build();
 

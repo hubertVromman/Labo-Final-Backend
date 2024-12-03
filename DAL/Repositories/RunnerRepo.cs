@@ -16,11 +16,11 @@ namespace DAL.Repositories {
             return conn.QuerySingleOrDefault<Runner>(sql, new { firstname, lastname });
         }
 
-        public Runner AddRunner(string firstname, string lastname) {
-            string sql = "INSERT INTO runner (Firstname, Lastname) " +
-                "VALUES (@firstname, @lastname)";
+        public Runner AddRunner(string firstname, string lastname, string? gender = null) {
+            string sql = "INSERT INTO runner (Firstname, Lastname, Gender) " +
+                "VALUES (@firstname, @lastname, @gender)";
 
-            conn.Execute(sql, new { firstname, lastname });
+            conn.Execute(sql, new { firstname, lastname, gender });
 
             return GetRunnerByName(firstname, lastname)!;
         }
