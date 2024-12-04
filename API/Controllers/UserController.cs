@@ -1,9 +1,13 @@
 ﻿using API.Mappers;
 using API.Models.Forms;
 using BLL.Services;
+using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace API.Controllers {
     [Route("api/[controller]")]
@@ -33,8 +37,8 @@ namespace API.Controllers {
 
             try {
                 return Ok(us.Login(
-                    email: form.Email.ToLower(),
-                    password: form.Password
+                    email: form.Email!,
+                    password: form.Password!
                 ));
             } catch (Exception ex) {
                 return BadRequest(ex.Message);
@@ -54,9 +58,31 @@ namespace API.Controllers {
             }
         }
 
+        [Authorize("UserRequired")]
+        [HttpGet("Profile")]
+        public IActionResult GetUserInfo() {
+            string? tokenFromRequest = HttpContext.Request.Headers["Authorization"];
+            if (tokenFromRequest is null)
+                return Unauthorized();
+            string token = tokenFromRequest.Substring(7, tokenFromRequest.Length - 7);
+            JwtSecurityToken jwt = new JwtSecurityToken(token);
+            string email = jwt.Claims.First(x => x.Type == ClaimTypes.Email).Value;
+            try {
+                return Ok(us.GetByEmail(email));
+            } catch (ArgumentException ex) {
+                return NotFound(ex.Message);
+            }
+        }
+
         [HttpGet("All")]
         public IActionResult GetAll() {
             return Ok(us.GetAll());
+        }
+
+        [HttpHead("CheckEmail/{email}")]
+        public IActionResult CheckEmail(string email) {
+            FullUser? u = us.GetByEmail(email);
+            return u is not null ? Ok() : NotFound(); 
         }
     }
 }

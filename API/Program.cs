@@ -20,6 +20,7 @@ namespace API {
 
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<RaceService>();
+            builder.Services.AddScoped<RunnerService>();
 
             builder.Services.AddScoped<UserRepo>();
             builder.Services.AddScoped<RunnerRepo>();

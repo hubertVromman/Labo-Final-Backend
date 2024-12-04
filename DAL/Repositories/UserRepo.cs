@@ -1,5 +1,5 @@
-﻿using DAL.Models.DTO;
-using Dapper;
+﻿using Dapper;
+using Domain.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace DAL.Repositories {
         }
 
         public FullUser? GetFullUserFromToken(string accessToken, string refreshToken) {
-            return conn.QuerySingleOrDefault<FullUser>("SELECT * FROM  [user] JOIN runner ON runner.RunnerId = [user].RunnerId WHERE RefreshToken = @refreshToken AND AccessToken = @accessToken AND RefreshTokenExpiration > GETDATE()", new { accessToken, refreshToken });
+            return conn.QuerySingleOrDefault<FullUser>("SELECT * FROM fulluser WHERE RefreshToken = @refreshToken AND AccessToken = @accessToken AND RefreshTokenExpiration > GETDATE()", new { accessToken, refreshToken });
         }
 
         public void SaveToken(string accessToken, string refreshToken, int userId, bool updateExpiration = true) {
@@ -44,6 +44,11 @@ namespace DAL.Repositories {
             DateTime refreshTokenExpiration = maxRefreshTokenExpiration > DateTime.Now.AddHours(3) ? DateTime.Now.AddHours(3) : maxRefreshTokenExpiration;
 
             conn.Execute(sql, new { accessToken, refreshToken, userId, maxRefreshTokenExpiration, refreshTokenExpiration });
+        }
+
+        public FullUser? GetByEmail(string email) {
+            string sql = "SELECT * FROM [fulluser] WHERE Email = @email";
+            return conn.QuerySingleOrDefault<FullUser>(sql, new { email });
         }
     }
 }

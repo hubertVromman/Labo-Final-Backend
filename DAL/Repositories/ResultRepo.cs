@@ -1,5 +1,4 @@
-﻿using DAL.Models.DTO;
-using Dapper;
+﻿using Dapper;
 using Domain.Models;
 using Microsoft.Data.SqlClient;
 using System;

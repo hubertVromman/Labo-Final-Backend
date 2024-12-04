@@ -1,6 +1,6 @@
 ﻿using BLL.Models;
-using DAL.Models.DTO;
 using DAL.Repositories;
+using Domain.Models;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,6 @@ namespace BLL.Services {
 
         public Token Login(string email, string password) {
             FullUser fu = ur.GetFullUserByEmailAndPassword(email, password) ?? throw new Exception("Mauvais email ou mot de passe");
-            Console.WriteLine(JsonSerializer.Serialize(fu));
             return GenerateTokensFromUser(fu);
         }
 
@@ -85,6 +84,10 @@ namespace BLL.Services {
             FullUser u = ur.GetFullUserFromToken(t.AccessToken, t.RefreshToken)
                 ?? throw new Exception("Token non valide ou expiré");
             return GenerateTokensFromUser(u, false);
+        }
+
+        public FullUser? GetByEmail(string email) {
+            return ur.GetByEmail(email);
         }
     }
 }

@@ -28,10 +28,10 @@ namespace API.Controllers {
             if (!Directory.Exists(pathToSave))
                 Directory.CreateDirectory(pathToSave);
 
-            string fullPath = Path.Combine(pathToSave, rf.File.FileName);
+            string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {((DateOnly)rf.StartDate!).Year} {rf.Distance}km.pdf");
             using (FileStream stream = new(fullPath, FileMode.Create))
             {
-                rf.File.CopyTo(stream);
+                rf.File!.CopyTo(stream);
             }
 
             rs.ParsePDF(fullPath, raceId);
