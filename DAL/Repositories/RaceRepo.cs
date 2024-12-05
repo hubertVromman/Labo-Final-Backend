@@ -20,5 +20,10 @@ namespace DAL.Repositories
 
             return conn.QuerySingle<int>("SELECT TOP 1 RaceId FROM race WHERE RaceName = @raceName AND Place = @place", r);
         }
+
+        public void UpdateResultNumber(int raceId, int resultNumber) {
+            string sql = "UPDATE race SET resultNumber = @resultNumber WHERE RaceId = @raceId";
+            conn.Execute(sql, new { raceId, resultNumber });
+        }
     }
 }

@@ -82,7 +82,15 @@ namespace API.Controllers {
         [HttpHead("CheckEmail/{email}")]
         public IActionResult CheckEmail(string email) {
             FullUser? u = us.GetByEmail(email);
-            return u is not null ? Ok() : NotFound(); 
+            return u is not null ? Ok() : NotFound();
+        }
+
+        [HttpHead("CheckName")]
+        public IActionResult CheckEmail([FromQuery] NameForm nf) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            FullUser? u = us.GetByName(nf.Firstname!, nf.Lastname!);
+            return u is not null ? Ok() : NotFound();
         }
     }
 }

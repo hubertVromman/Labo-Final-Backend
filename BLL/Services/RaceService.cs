@@ -2,6 +2,7 @@
 using BLL.ParserModels;
 using BLL.Tools;
 using DAL.Repositories;
+using Domain.Forms;
 using Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace BLL.Services
                 int generalRank = 1;
                 int maleRank = 1;
                 int femaleRank = 1;
+                int resultNumber = 0;
                 foreach (Page page in document.GetPages())
                 {
                     var lines = page.GetWords().OrderBy(x => x.BoundingBox.Left).GroupBy(x => x.BoundingBox.Bottom, new ToleranceEqualityComparer());
@@ -106,7 +108,7 @@ namespace BLL.Services
                             gender = null;
                             genderRank = null;
                         }
-                        ResultInfo resultInfo = new()
+                        ResultForm resultInfo = new()
                         {
                             RaceId = raceId,
                             GeneralRank = generalRank++,
@@ -118,14 +120,23 @@ namespace BLL.Services
                             GenderRank = genderRank,
                         };
 
+                        resultInfo.Firstname = Capitalize(resultInfo.Firstname.Trim().Trim('*'));
+                        resultInfo.Lastname = Capitalize(resultInfo.Lastname.Trim().Trim('*'));
+
                         resultInfo.RunnerId = AddRunnerIfNotExist(resultInfo);
                         rer.AddResult(resultInfo);
+                        resultNumber++;
                     }
                 }
+                rar.UpdateResultNumber(raceId, resultNumber);
             }
         }
 
-        public int AddRunnerIfNotExist(ResultInfo resultInfo)
+        private string Capitalize(string input) {
+            return string.Join("-", input.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..].ToLower()));
+        }
+
+        public int AddRunnerIfNotExist(ResultForm resultInfo)
         {
             Runner? runner = rur.GetRunnerByName(resultInfo.Firstname, resultInfo.Lastname);
             if (runner != null)

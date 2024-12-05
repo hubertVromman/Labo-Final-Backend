@@ -16,11 +16,13 @@ namespace BLL.Services {
     public class UserService(UserRepo ur, RunnerRepo rr) {
 
         public void Register(string email, string password, string firstname, string lastname) {
+            password = password.HashTo64();
             Runner r = rr.GetRunnerByName(firstname, lastname) ?? rr.AddRunner(firstname, lastname);
             ur.AddUser(email, password, r.RunnerId);
         }
 
         public Token Login(string email, string password) {
+            password = password.HashTo64();
             FullUser fu = ur.GetFullUserByEmailAndPassword(email, password) ?? throw new Exception("Mauvais email ou mot de passe");
             return GenerateTokensFromUser(fu);
         }
@@ -88,6 +90,10 @@ namespace BLL.Services {
 
         public FullUser? GetByEmail(string email) {
             return ur.GetByEmail(email);
+        }
+
+        public FullUser? GetByName(string firstname, string lastname) {
+            return ur.GetByName(firstname, lastname);
         }
     }
 }

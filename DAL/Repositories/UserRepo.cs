@@ -3,6 +3,7 @@ using Domain.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
@@ -11,10 +12,10 @@ using System.Threading.Tasks;
 namespace DAL.Repositories {
     public class UserRepo(SqlConnection conn) {
         public bool AddUser(string email, string password, int runnerId) {
-            string sql = "INSERT INTO [user] (Email, Password, RunnerId) " +
-                "VALUES (@email, @password, @runnerId)";
+            //string sql = "INSERT INTO [user] (Email, Password, RunnerId) " +
+            //    "VALUES (@email, @password, @runnerId)";
 
-            return conn.Execute(sql, new { email, password, runnerId }) > 0;
+            return conn.Execute("Register", new { email, password, runnerId }, commandType: CommandType.StoredProcedure) > 0;
         }
 
         public IEnumerable<User> GetAll() {
@@ -23,9 +24,8 @@ namespace DAL.Repositories {
         }
 
         public FullUser? GetFullUserByEmailAndPassword(string email, string password) {
-
-            string sql = "SELECT * FROM [user] JOIN runner ON runner.RunnerId = [user].RunnerId WHERE Email = @email AND Password = @password";
-            return conn.QuerySingleOrDefault<FullUser>(sql, new { email, password });
+            //string sql = "SELECT * FROM [user] JOIN runner ON runner.RunnerId = [user].RunnerId WHERE Email = @email AND Password = @password";
+            return conn.QuerySingleOrDefault<FullUser>("Login", new { email, password }, commandType: CommandType.StoredProcedure);
         }
 
         public FullUser? GetFullUserFromToken(string accessToken, string refreshToken) {
@@ -49,6 +49,11 @@ namespace DAL.Repositories {
         public FullUser? GetByEmail(string email) {
             string sql = "SELECT * FROM [fulluser] WHERE Email = @email";
             return conn.QuerySingleOrDefault<FullUser>(sql, new { email });
+        }
+
+        public FullUser? GetByName(string firstname, string lastname) {
+            string sql = "SELECT * FROM [fulluser] WHERE Firstname = @firstname AND Lastname = @lastname";
+            return conn.QuerySingleOrDefault<FullUser>(sql, new { firstname, lastname });
         }
     }
 }

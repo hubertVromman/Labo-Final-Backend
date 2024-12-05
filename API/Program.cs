@@ -21,11 +21,14 @@ namespace API {
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<RaceService>();
             builder.Services.AddScoped<RunnerService>();
+            builder.Services.AddScoped<ResultService>();
+            builder.Services.AddScoped<LocalityService>();
 
             builder.Services.AddScoped<UserRepo>();
-            builder.Services.AddScoped<RunnerRepo>();
             builder.Services.AddScoped<RaceRepo>();
+            builder.Services.AddScoped<RunnerRepo>();
             builder.Services.AddScoped<ResultRepo>();
+            builder.Services.AddScoped<LocalityRepo>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

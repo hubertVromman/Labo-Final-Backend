@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Models
+namespace Domain.Forms
 {
-    public class ResultInfo
+    public class ResultForm
     {
         public int RaceId { get; set; }
         public int GeneralRank { get; set; }

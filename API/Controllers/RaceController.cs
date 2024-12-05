@@ -29,6 +29,9 @@ namespace API.Controllers {
                 Directory.CreateDirectory(pathToSave);
 
             string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {((DateOnly)rf.StartDate!).Year} {rf.Distance}km.pdf");
+            if (System.IO.File.Exists(fullPath)) {
+                return BadRequest(new { error = "Race already added" });
+            }
             using (FileStream stream = new(fullPath, FileMode.Create))
             {
                 rf.File!.CopyTo(stream);
