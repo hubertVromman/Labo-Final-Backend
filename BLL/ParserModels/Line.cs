@@ -8,7 +8,7 @@ namespace BLL.ParserModels
 {
     internal class Line
     {
-        public static double Precision { get; set; } = 1;
+        public static double Precision { get; set; } = 5;
         public double Position { get; set; }
         public List<Item> Items { get; set; } = new();
 

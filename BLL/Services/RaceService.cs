@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UglyToad.PdfPig;
@@ -18,12 +19,12 @@ namespace BLL.Services
 {
     public class RaceService(ResultRepo rer, RunnerRepo rur, RaceRepo rar)
     {
-        public int AddRace(Race race)
+        public Race AddRace(Race race)
         {
             return rar.AddRace(race);
         }
 
-        public void ParsePDF(string filePath, int raceId)
+        public void ParsePDF(string filePath, Race race)
         {
             using (PdfDocument document = PdfDocument.Open(filePath))
             {
@@ -76,11 +77,31 @@ namespace BLL.Services
                         }
                     }
 
-                    double generalRankPosition = parsedLines[0].Items.Where(i => i.Text.ToLower() == "place").First()?.Position ?? throw new Exception("Parsing error");
-                    double lastnamePosition = parsedLines[0].Items.Where(i => i.Text.ToLower() == "nom").First()?.Position ?? throw new Exception("Parsing error");
-                    double firstnamePosition = parsedLines[0].Items.Where(i => i.Text.ToLower().Replace('é', 'e') == "prenom").First()?.Position ?? throw new Exception("Parsing error");
-                    double genderPosition = parsedLines[0].Items.Where(i => i.Text.ToLower() == "sexe").First()?.Position ?? throw new Exception("Parsing error");
-                    double timePosition = parsedLines[0].Items.Where(i => i.Text.ToLower() == "temps").First()?.Position ?? throw new Exception("Parsing error");
+                    string[] generalRankLabels = ["place", "general", "rang"];
+                    double generalRankPosition = FindPosition(parsedLines[0].Items, generalRankLabels)
+                        ?? throw new Exception("Parsing error: GeneralRank not found");
+
+                    string[] namesLabels = ["nom prenom"];
+                    double? namesPosition = FindPosition(parsedLines[0].Items, namesLabels);
+
+                    double? lastnamePosition = null;
+                    double? firstnamePosition = null;
+                    if (namesPosition is null) {
+                        string[] lastnameLabels = ["nom"];
+                        lastnamePosition = FindPosition(parsedLines[0].Items, lastnameLabels)
+                             ?? throw new Exception("Parsing error: Lastname and Names not found");
+                        string[] firstnameLabels = ["prenom"];
+                        firstnamePosition = FindPosition(parsedLines[0].Items, firstnameLabels)
+                             ?? throw new Exception("Parsing error: Firstname and Names not found");
+                    }
+
+                    string[] genderLabels = ["sexe", "mf"];
+                    double genderPosition = FindPosition(parsedLines[0].Items, genderLabels) 
+                        ?? throw new Exception("Parsing error: Gender not found");
+
+                    string[] timeLabels = ["temps"];
+                    double timePosition = FindPosition(parsedLines[0].Items, timeLabels) 
+                        ?? throw new Exception("Parsing error: Time not found");
 
                     string toDelete = parsedLines[0].Items[0].Text;
 
@@ -95,6 +116,8 @@ namespace BLL.Services
 
                     foreach (var line in parsedLines)
                     {
+                        Console.WriteLine(JsonSerializer.Serialize(line));
+                        Console.WriteLine(genderPosition);
                         string? time = line.FindItemByPosition(timePosition)?.Text;
                         string? gender = line.FindItemByPosition(genderPosition)!.Text;
                         int? genderRank;
@@ -108,15 +131,38 @@ namespace BLL.Services
                             gender = null;
                             genderRank = null;
                         }
+                        TimeOnly? parsedTime = null;
+                        Decimal? speed = null;
+                        string? pace = null;
+                        if (time is not null && time[0] != 'D' && time[0] != 'd') {
+                            if (time.Length == 5)
+                                time = $"00:{time}";
+                            parsedTime = TimeOnly.Parse(time);
+                            speed = (Decimal)race.RealDistance / ((Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600);
+                            int minutes = (int)(60M / speed);
+                            int seconds = (int)(60 * (60 - minutes * speed) / speed);
+                            pace = $"{minutes}:{seconds:00}";
+                        }
+                        string lastname, firstname;
+                        if (namesPosition is not null) {
+                            string names = line.FindItemByPosition((double)namesPosition)!.Text;
+                            lastname = names[..names.LastIndexOf(' ')];
+                            firstname = names[names.LastIndexOf(' ')..];
+                        } else {
+                            lastname = line.FindItemByPosition((double)lastnamePosition!)!.Text;
+                            firstname = line.FindItemByPosition((double)firstnamePosition!)!.Text;
+                        }
                         ResultForm resultInfo = new()
                         {
-                            RaceId = raceId,
+                            RaceId = race.RaceId,
                             GeneralRank = generalRank++,
                             GeneralRankShown = line.FindItemByPosition(generalRankPosition)!.Text,
-                            Lastname = line.FindItemByPosition(lastnamePosition)!.Text,
-                            Firstname = line.FindItemByPosition(firstnamePosition)!.Text,
+                            Lastname = lastname,
+                            Firstname = firstname,
                             Gender = gender,
-                            Time = time is not null ? TimeOnly.Parse(time) : null,
+                            Time = parsedTime,
+                            Speed = speed,
+                            Pace = pace,
                             GenderRank = genderRank,
                         };
 
@@ -128,12 +174,18 @@ namespace BLL.Services
                         resultNumber++;
                     }
                 }
-                rar.UpdateResultNumber(raceId, resultNumber);
+                rar.UpdateResultNumber(race.RaceId, resultNumber);
             }
         }
 
+        private double? FindPosition(List<Item> items, string[] labels) {
+            return items.Where(i => labels.Contains(i.Text.ToLower().Replace('é', 'e').Replace('è', 'e'))).FirstOrDefault()?.Position;
+        }
+
         private string Capitalize(string input) {
-            return string.Join("-", input.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..].ToLower()));
+            string result = string.Join("-", input.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..].ToLower()));
+            result = string.Join(" ", input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..]));
+            return result;
         }
 
         public int AddRunnerIfNotExist(ResultForm resultInfo)
@@ -147,6 +199,14 @@ namespace BLL.Services
             {
                 return rur.AddRunner(resultInfo.Firstname, resultInfo.Lastname, resultInfo.Gender).RunnerId;
             }
+        }
+
+        public ObjectList<Race> GetByDate(int offset, int limit) {
+            return rar.GetByDate(offset, limit);
+        }
+
+        public Race GetById(int id) {
+            return rar.GetById(id);
         }
     }
 }

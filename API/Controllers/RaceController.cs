@@ -2,6 +2,7 @@
 using API.Models.Forms;
 using API.Tools;
 using BLL.Services;
+using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.PortableExecutable;
@@ -21,7 +22,7 @@ namespace API.Controllers {
         public ActionResult AddRace(RaceForm rf) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            int raceId = rs.AddRace(rf.ToDomain());
+            Race race = rs.AddRace(rf.ToDomain());
 
             string pathToSave = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 
@@ -37,9 +38,23 @@ namespace API.Controllers {
                 rf.File!.CopyTo(stream);
             }
 
-            rs.ParsePDF(fullPath, raceId);
+            rs.ParsePDF(fullPath, race);
 
             return Ok();
+        }
+
+        [HttpGet("ByDate")]
+        public ActionResult GetByDate([FromQuery] PaginationForm pf) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            return Ok(rs.GetByDate((int)pf.Offset!, (int)pf.Limit!));
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult GetByDate([FromRoute] int id) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            return Ok(rs.GetById(id));
         }
     }
 }

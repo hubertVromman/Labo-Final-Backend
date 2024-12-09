@@ -11,5 +11,10 @@ namespace BLL.Services {
         public IEnumerable<Result> GetByRunnerId(int runnerId) {
             return rr.GetByRunnerId(runnerId);
         }
+
+        public IEnumerable<Result> GetByRaceId(int runnerId) {
+            return rr.GetByRaceId(runnerId);
+        }
+        
     }
 }

@@ -17,5 +17,7 @@ namespace Domain.Forms
         public string? Gender { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
+        public Decimal? Speed { get; set; }
+        public string? Pace { get; set; }
     }
 }
