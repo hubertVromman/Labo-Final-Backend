@@ -4,12 +4,13 @@
     public double Position { get; set; }
     public List<Item> Items { get; set; } = new();
 
-    internal Item? FindItemByPosition(double position) {
-      foreach (var item in Items) {
-        if (Math.Abs(item.Position - position) < Precision)
-          return item;
-      }
-      return null;
+        internal Item? FindItemByPosition(double position)
+        {
+            foreach (var item in Items)
+            {
+                if (Math.Abs(item.Position - position) < Precision) return item;
+            }
+            return null;
+        }
     }
-  }
 }

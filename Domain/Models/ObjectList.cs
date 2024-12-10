@@ -1,8 +1,14 @@
-﻿namespace Domain.Models {
-  public class ObjectList<T> {
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-    public int Count { get; set; }
+namespace Domain.Models {
+    public class ObjectList<T> {
 
-    public IEnumerable<T> Objects { get; set; }
-  }
+        public int Count { get; set; }
+
+        public IEnumerable<T> Objects { get; set; }
+    }
 }
