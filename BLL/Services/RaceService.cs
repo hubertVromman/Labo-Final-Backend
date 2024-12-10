@@ -3,7 +3,6 @@ using BLL.Tools;
 using DAL.Repositories;
 using Domain.Forms;
 using Domain.Models;
-using System.Text.Json;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 
@@ -21,10 +20,6 @@ namespace BLL.Services {
         int resultNumber = 0;
         foreach (Page page in document.GetPages()) {
           var lines = page.GetWords().OrderBy(x => x.BoundingBox.Left).GroupBy(x => x.BoundingBox.Bottom, new ToleranceEqualityComparer());
-                {
-                    var lines = page.GetWords().OrderBy(x => x.BoundingBox.Left).GroupBy(x => x.BoundingBox.Bottom, new ToleranceEqualityComparer());
-                {
-                    var lines = page.GetWords().OrderBy(x => x.BoundingBox.Left).GroupBy(x => x.BoundingBox.Bottom, new ToleranceEqualityComparer());
 
           List<Line> parsedLines = [];
 
@@ -90,68 +85,66 @@ namespace BLL.Services {
           for (int i = 0; i < parsedLines.Count; i++) {
             if (parsedLines[i].Items[0].Text == toDelete) {
               parsedLines.RemoveAt(i);
-          foreach (var line in parsedLines) {
-            string generalRankShown = line.FindItemByPosition(generalRankPosition)!.Text.Trim().Trim('.').Trim(')');
-            string? time = line.FindItemByPosition(timePosition)?.Text;
-            string? gender = line.FindItemByPosition(genderPosition)!.Text;
-            int? genderRank;
-            if (gender.Contains('m') || gender.Contains('M')) {
-              gender = "m";
-              genderRank = maleRank++;
-            } else if (gender.Contains('f') || gender.Contains('F')) {
-              gender = "f";
-              genderRank = femaleRank++;
-            } else {
-              gender = null;
-              genderRank = null;
-            }
-            TimeOnly? parsedTime = null;
-            Decimal? speed = null;
-            string? pace = null;
-            if (time is not null && char.ToLower(generalRankShown[0]) != 'd' && char.ToLower(time[0]) != 'd') {
-              if (time.Length == 5)
-                time = $"00:{time}";
-              parsedTime = TimeOnly.Parse(time);
-              speed = (Decimal)race.RealDistance / ( (Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600 );
-              int minutes = (int)( 60M / speed );
-              int seconds = (int)( 60 * ( 60 - minutes * speed ) / speed );
-              pace = $"{minutes}:{seconds:00}";
-            }
-            string lastname, firstname;
-            if (namesPosition is not null) {
-              string names = line.FindItemByPosition((double)namesPosition)!.Text;
-              lastname = names[..names.LastIndexOf(' ')];
-              firstname = names[names.LastIndexOf(' ')..];
-            } else {
-              lastname = line.FindItemByPosition((double)lastnamePosition!)!.Text;
-              firstname = line.FindItemByPosition((double)firstnamePosition!)!.Text;
-            }
-            ResultForm resultInfo = new() {
-              RaceId = race.RaceId,
-              GeneralRank = generalRank++,
-              GeneralRankShown = generalRankShown,
-              Lastname = lastname,
-              Firstname = firstname,
-              Gender = gender,
-              Time = parsedTime,
-              Speed = speed,
-              Pace = pace,
-              GenderRank = genderRank,
-            };
-                            Speed = speed,
-                            Pace = pace,
-                            GenderRank = genderRank,
-                        };
+              foreach (var line in parsedLines) {
+                string generalRankShown = line.FindItemByPosition(generalRankPosition)!.Text.Trim().Trim('.').Trim(')');
+                string? time = line.FindItemByPosition(timePosition)?.Text;
+                string? gender = line.FindItemByPosition(genderPosition)!.Text;
+                int? genderRank;
+                if (gender.Contains('m') || gender.Contains('M')) {
+                  gender = "m";
+                  genderRank = maleRank++;
+                } else if (gender.Contains('f') || gender.Contains('F')) {
+                  gender = "f";
+                  genderRank = femaleRank++;
+                } else {
+                  gender = null;
+                  genderRank = null;
+                }
+                TimeOnly? parsedTime = null;
+                Decimal? speed = null;
+                string? pace = null;
+                if (time is not null && char.ToLower(generalRankShown[0]) != 'd' && char.ToLower(time[0]) != 'd') {
+                  if (time.Length == 5)
+                    time = $"00:{time}";
+                  parsedTime = TimeOnly.Parse(time);
+                  speed = (Decimal)race.RealDistance / ( (Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600 );
+                  int minutes = (int)( 60M / speed );
+                  int seconds = (int)( 60 * ( 60 - minutes * speed ) / speed );
+                  pace = $"{minutes}:{seconds:00}";
+                }
+                string lastname, firstname;
+                if (namesPosition is not null) {
+                  string names = line.FindItemByPosition((double)namesPosition)!.Text;
+                  lastname = names[..names.LastIndexOf(' ')];
+                  firstname = names[names.LastIndexOf(' ')..];
+                } else {
+                  lastname = line.FindItemByPosition((double)lastnamePosition!)!.Text;
+                  firstname = line.FindItemByPosition((double)firstnamePosition!)!.Text;
+                }
+                ResultForm resultInfo = new() {
+                  RaceId = race.RaceId,
+                  GeneralRank = generalRank++,
+                  GeneralRankShown = generalRankShown,
+                  Lastname = lastname,
+                  Firstname = firstname,
+                  Gender = gender,
+                  Time = parsedTime,
+                  Speed = speed,
+                  Pace = pace,
+                  GenderRank = genderRank,
+                };
 
-            resultInfo.Firstname = Capitalize(resultInfo.Firstname.Trim().Trim('*'));
-            resultInfo.Lastname = Capitalize(resultInfo.Lastname.Trim().Trim('*'));
+                resultInfo.Firstname = Capitalize(resultInfo.Firstname.Trim().Trim('*'));
+                resultInfo.Lastname = Capitalize(resultInfo.Lastname.Trim().Trim('*'));
 
-            resultInfo.RunnerId = AddRunnerIfNotExist(resultInfo);
-            rer.AddResult(resultInfo);
-            resultNumber++;
+                resultInfo.RunnerId = AddRunnerIfNotExist(resultInfo);
+                rer.AddResult(resultInfo);
+                resultNumber++;
+              }
+            }
+            rar.UpdateResultNumber(race.RaceId, resultNumber);
           }
         }
-        rar.UpdateResultNumber(race.RaceId, resultNumber);
       }
     }
 
