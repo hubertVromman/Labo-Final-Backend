@@ -13,13 +13,16 @@ namespace DAL.Repositories {
       conn.Execute(sql, ri);
     }
 
-    public IEnumerable<Result> GetByRaceId(int raceId) {
-      string sql = "SELECT result.*, runner.* FROM result JOIN runner ON runner.RunnerId = result.RunnerId WHERE RaceId = @raceId ORDER BY GeneralRank";
-      return conn.Query<Result, Runner, Result>(sql, (result, runner) => {
+    public ObjectList<Result> GetByRaceId(int raceId, int offset, int limit) {
+      string sql = "SELECT result.*, runner.* FROM result JOIN runner ON runner.RunnerId = result.RunnerId WHERE RaceId = @raceId ORDER BY GeneralRank OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
+      IEnumerable<Result> resultList = conn.Query<Result, Runner, Result>(sql, (result, runner) => {
         result.Runner = runner;
         return result;
-      }, new { raceId },
+      }, new { raceId, offset, limit },
       splitOn: "RunnerId");
+      sql = "SELECT COUNT(1) FROM result WHERE RaceId = @raceId";
+      int count = conn.QuerySingle<int>(sql, new { raceId });
+      return new ObjectList<Result> { Count = count, Objects = resultList };
     }
 
     public IEnumerable<Result> GetByRunnerId(int runnerId) {

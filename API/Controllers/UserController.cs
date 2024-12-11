@@ -14,8 +14,7 @@ namespace API.Controllers {
 
     [HttpPost("Register")]
     public IActionResult Register([FromBody] RegisterForm form) {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
 
       try {
         us.Register(
@@ -32,8 +31,7 @@ namespace API.Controllers {
 
     [HttpPost("Login")]
     public IActionResult Login([FromBody] LoginForm form) {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
 
       try {
         return Ok(us.Login(
@@ -47,8 +45,7 @@ namespace API.Controllers {
 
     [HttpPost("RefreshToken")]
     public IActionResult RefreshToken([FromBody] TokenForm form) {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
 
       try {
         return Ok(us.RefreshToken(
@@ -88,8 +85,7 @@ namespace API.Controllers {
 
     [HttpHead("CheckName")]
     public IActionResult CheckEmail([FromQuery] NameForm nf) {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
 
       FullUser? u = us.GetByName(nf.Firstname!, nf.Lastname!);
       return u is not null ? Ok() : NotFound();

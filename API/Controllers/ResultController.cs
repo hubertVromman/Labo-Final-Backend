@@ -1,4 +1,5 @@
-﻿using BLL.Services;
+﻿using API.Models.Forms;
+using BLL.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,8 +15,11 @@ namespace API.Controllers {
     }
 
     [HttpGet("ByRace/{raceId}")]
-    public IActionResult GetByRaceId(int raceId) {
-      IEnumerable<Result> results = rs.GetByRaceId(raceId);
+    public IActionResult GetByRaceId(int raceId, [FromQuery] PaginationForm pf) {
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+      ObjectList<Result> results = rs.GetByRaceId(raceId, (int)pf.Offset!, (int)pf.Limit!);
       return Ok(results);
     }
   }

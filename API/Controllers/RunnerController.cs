@@ -17,8 +17,7 @@ namespace API.Controllers {
 
     [HttpGet("ByName")]
     public IActionResult GetByName([FromQuery] NameForm nf) {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
 
       Runner? r = rs.GetByName(nf.Firstname!, nf.Lastname!);
       return r is not null ? Ok(r) : NotFound();

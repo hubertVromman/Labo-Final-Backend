@@ -7,8 +7,8 @@ namespace BLL.Services {
       return rr.GetByRunnerId(runnerId);
     }
 
-    public IEnumerable<Result> GetByRaceId(int runnerId) {
-      return rr.GetByRaceId(runnerId);
+    public ObjectList<Result> GetByRaceId(int runnerId, int offset, int limit) {
+      return rr.GetByRaceId(runnerId, offset, limit);
     }
 
   }

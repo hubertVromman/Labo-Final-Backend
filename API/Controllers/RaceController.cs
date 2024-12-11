@@ -22,7 +22,7 @@ namespace API.Controllers {
       if (!Directory.Exists(pathToSave))
         Directory.CreateDirectory(pathToSave);
 
-      string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {( (DateOnly)rf.StartDate! ).Year} {rf.Distance}km.pdf");
+      string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {((DateOnly)rf.StartDate!).Year} {rf.Distance}km.pdf");
       if (System.IO.File.Exists(fullPath)) {
         return BadRequest(new { error = "Race already added" });
       }

@@ -91,10 +91,10 @@ namespace BLL.Services {
                 string? gender = line.FindItemByPosition(genderPosition)!.Text;
                 int? genderRank;
                 if (gender.Contains('m') || gender.Contains('M')) {
-                  gender = "m";
+                  gender = "M";
                   genderRank = maleRank++;
                 } else if (gender.Contains('f') || gender.Contains('F')) {
-                  gender = "f";
+                  gender = "F";
                   genderRank = femaleRank++;
                 } else {
                   gender = null;
@@ -107,9 +107,9 @@ namespace BLL.Services {
                   if (time.Length == 5)
                     time = $"00:{time}";
                   parsedTime = TimeOnly.Parse(time);
-                  speed = (Decimal)race.RealDistance / ( (Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600 );
-                  int minutes = (int)( 60M / speed );
-                  int seconds = (int)( 60 * ( 60 - minutes * speed ) / speed );
+                  speed = (Decimal)race.RealDistance / ((Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600);
+                  int minutes = (int)(60M / speed);
+                  int seconds = (int)(60 * (60 - minutes * speed) / speed);
                   pace = $"{minutes}:{seconds:00}";
                 }
                 string lastname, firstname;
