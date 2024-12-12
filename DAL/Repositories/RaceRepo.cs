@@ -1,16 +1,21 @@
 ﻿using Dapper;
 using Domain.Models;
 using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Text.Json;
 
 namespace DAL.Repositories {
   public class RaceRepo(SqlConnection conn) {
-    public Race AddRace(Race r) {
+    public Race AddRaceIfNotExist(Race r) {
+      Race? race = conn.QuerySingleOrDefault<Race>("SELECT TOP 1 * FROM race WHERE RaceName = @raceName AND StartDate = @startDate AND Distance = @distance", r);
+      if (race is not null) throw new Exception("Race already exists");
+
       string sql = "INSERT INTO race (RaceName, Place, StartDate, RaceType, Distance, RealDistance) " +
           "VALUES (@raceName, @place, @startDate, @raceType, @distance, @realDistance)";
 
       conn.Execute(sql, r);
 
-      return conn.QuerySingle<Race>("SELECT TOP 1 * FROM race WHERE RaceName = @raceName AND Place = @place", r);
+      return conn.QuerySingle<Race>("SELECT TOP 1 * FROM race WHERE RaceName = @raceName AND StartDate = @startDate AND Distance = @distance", r);
     }
 
     public void UpdateResultNumber(int raceId, int resultNumber) {
@@ -29,6 +34,21 @@ namespace DAL.Repositories {
     public Race GetById(int id) {
       string sql = "SELECT * FROM race WHERE RaceId = @id";
       return conn.QuerySingle<Race>(sql, new { id });
+    }
+
+    public IEnumerable<Race> Search(string query) {
+      string[] fragments = query.Split(' ');
+
+      string sql = "SELECT * FROM race WHERE";
+
+      var parameters = new DynamicParameters();
+      for (int i = 0; i < fragments.Length; i++) {
+        parameters.Add("fragment" + i, "%" + fragments[i] + "%", DbType.String, ParameterDirection.Input, fragments[i].Length + 2);
+        if (i > 0)
+          sql += " OR ";
+        sql += " RaceName LIKE @fragment" + i;
+      }
+      return conn.Query<Race>(sql, parameters);
     }
   }
 }

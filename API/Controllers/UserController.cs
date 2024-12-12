@@ -72,6 +72,7 @@ namespace API.Controllers {
       }
     }
 
+    [Authorize("AdminRequired")]
     [HttpGet("All")]
     public IActionResult GetAll() {
       return Ok(us.GetAll());

@@ -10,5 +10,9 @@ namespace BLL.Services {
     public Runner? GetByName(string firstname, string lastname) {
       return rr.GetRunnerByName(firstname, lastname);
     }
+
+    public IEnumerable<Runner> Search(string query) {
+      return rr.Search(query);
+    }
   }
 }

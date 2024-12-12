@@ -14,18 +14,22 @@ namespace API.Controllers {
     public ActionResult AddRace(RaceForm rf) {
       if (!ModelState.IsValid)
         return BadRequest(ModelState);
-
-      Race race = rs.AddRace(rf.ToDomain());
+      Race race;
+      try {
+        race = rs.AddRaceIfNotExist(rf.ToDomain());
+      } catch (Exception ex) {
+        return BadRequest(new { error = ex.Message });
+      }
 
       string pathToSave = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 
       if (!Directory.Exists(pathToSave))
         Directory.CreateDirectory(pathToSave);
 
-      string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {((DateOnly)rf.StartDate!).Year} {rf.Distance}km.pdf");
-      if (System.IO.File.Exists(fullPath)) {
-        return BadRequest(new { error = "Race already added" });
-      }
+      string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {rf.Distance}km {((DateOnly)rf.StartDate!).Year}.pdf");
+      //if (System.IO.File.Exists(fullPath)) {
+      //  return BadRequest(new { error = "Race already added" });
+      //}
       using (FileStream stream = new(fullPath, FileMode.Create)) {
         rf.File!.CopyTo(stream);
       }
@@ -49,6 +53,12 @@ namespace API.Controllers {
         return BadRequest(ModelState);
 
       return Ok(rs.GetById(id));
+    }
+
+    [HttpGet("Search/{query}")]
+    public IActionResult Search(string query) {
+
+      return Ok(rs.Search(query));
     }
   }
 }

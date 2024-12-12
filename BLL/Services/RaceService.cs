@@ -8,8 +8,8 @@ using UglyToad.PdfPig.Content;
 
 namespace BLL.Services {
   public class RaceService(ResultRepo rer, RunnerRepo rur, RaceRepo rar) {
-    public Race AddRace(Race race) {
-      return rar.AddRace(race);
+    public Race AddRaceIfNotExist(Race race) {
+      return rar.AddRaceIfNotExist(race);
     }
 
     public void ParsePDF(string filePath, Race race) {
@@ -173,6 +173,10 @@ namespace BLL.Services {
 
     public Race GetById(int id) {
       return rar.GetById(id);
+    }
+
+    public IEnumerable<Race> Search(string query) {
+      return rar.Search(query);
     }
   }
 }

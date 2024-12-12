@@ -22,5 +22,12 @@ namespace API.Controllers {
       Runner? r = rs.GetByName(nf.Firstname!, nf.Lastname!);
       return r is not null ? Ok(r) : NotFound();
     }
+
+
+    [HttpGet("Search/{query}")]
+    public IActionResult Search(string query) {
+
+      return Ok(rs.Search(query));
+    }
   }
 }
