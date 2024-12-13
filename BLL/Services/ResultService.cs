@@ -1,4 +1,5 @@
-﻿using DAL.Repositories;
+﻿using BLL.Tools;
+using DAL.Repositories;
 using Domain.Models;
 
 namespace BLL.Services {
@@ -8,8 +9,12 @@ namespace BLL.Services {
     }
 
     public ObjectList<Result> GetByRaceId(int runnerId, int offset, int limit) {
-      return rr.GetByRaceId(runnerId, offset, limit);
+      ObjectList<Result> results = rr.GetByRaceId(runnerId, offset, limit);
+      results.Objects = results.Objects.Select(o => {
+        o.Runner = o.Runner.Anonymize();
+        return o;
+      });
+      return results;
     }
-
   }
 }

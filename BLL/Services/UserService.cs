@@ -90,5 +90,9 @@ namespace BLL.Services {
     public FullUser? GetByName(string firstname, string lastname) {
       return ur.GetByName(firstname, lastname);
     }
+
+    public bool ChangeAnonymous(int userId, bool isAnonymous) {
+      return ur.ChangeAnonymous(userId, isAnonymous);
+    }
   }
 }
