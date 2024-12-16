@@ -3,7 +3,7 @@
 namespace API.Models.Forms {
   public class AnonymousForm {
 
-        [Required]
-        public bool IsAnonymous { get; set; }
-    }
+    [Required]
+    public bool IsAnonymous { get; set; }
+  }
 }

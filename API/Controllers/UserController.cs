@@ -17,13 +17,15 @@ namespace API.Controllers {
       if (!ModelState.IsValid) return BadRequest(ModelState);
 
       try {
-        us.Register(
-            email: form.Email.ToLower(),
-            password: form.Password,
-            firstname: form.Firstname,
-            lastname: form.Lastname
-        );
-        return Ok();
+        if (us.Register(
+          email: form.Email.ToLower(),
+          password: form.Password,
+          firstname: form.Firstname,
+          lastname: form.Lastname
+        ))
+          return Ok();
+        else
+          return BadRequest();
       } catch (Exception ex) {
         return BadRequest(ex.Message);
       }
@@ -75,6 +77,8 @@ namespace API.Controllers {
     [Authorize("UserRequired")]
     [HttpPost("Anonymous")]
     public IActionResult ChangeAnonymous([FromBody] AnonymousForm af) {
+      if (!ModelState.IsValid) return BadRequest(ModelState);
+
       string? tokenFromRequest = HttpContext.Request.Headers.Authorization;
       if (tokenFromRequest is null)
         return Unauthorized();
@@ -92,6 +96,16 @@ namespace API.Controllers {
     [HttpGet("All")]
     public IActionResult GetAll() {
       return Ok(us.GetAll());
+    }
+
+    [HttpPost("Activate")]
+    public IActionResult Activate([FromBody] ActivationForm af) {
+      if (!ModelState.IsValid) return BadRequest(ModelState);
+
+      if (us.Activate(((int)af.UserId!), af.ActivationCode!))
+        return Ok();
+      else
+        return BadRequest();
     }
 
     [HttpHead("CheckEmail/{email}")]

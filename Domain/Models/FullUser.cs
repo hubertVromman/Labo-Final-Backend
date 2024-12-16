@@ -9,5 +9,6 @@
     public string Gender { get; set; }
     public int BirthYear { get; set; }
     public bool IsAnonymous { get; set; }
+    public bool IsActive { get; set; }
   }
 }

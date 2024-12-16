@@ -5,11 +5,12 @@ using System.Data;
 
 namespace DAL.Repositories {
   public class UserRepo(SqlConnection conn) {
-    public bool AddUser(string email, string password, int runnerId) {
+    public int AddUser(string email, string password, int runnerId, string activationCode) {
       //string sql = "INSERT INTO [user] (Email, Password, RunnerId) " +
       //    "VALUES (@email, @password, @runnerId)";
-
-      return conn.Execute("Register", new { email, password, runnerId }, commandType: CommandType.StoredProcedure) > 0;
+      int userId = conn.QuerySingle<int>("Register", new { email, password, runnerId, activationCode }, commandType: CommandType.StoredProcedure);
+            Console.WriteLine(userId);
+      return userId;
     }
 
     public IEnumerable<User> GetAll() {
@@ -53,6 +54,13 @@ namespace DAL.Repositories {
     public bool ChangeAnonymous(int userId, bool isAnonymous) {
       string sql = "UPDATE r SET r.IsAnonymous = @isAnonymous FROM runner r JOIN [user] u ON u.RunnerId = r.RunnerId WHERE u.UserId = @userId";
       return conn.Execute(sql, new { userId, isAnonymous }) > 0;
+    }
+
+    public bool Activate(int userId, string activationCode) {
+      string sql = "UPDATE [user] SET IsActive = 1 WHERE ActivationCode = @activationCode AND UserId = @userId";
+      conn.Execute(sql, new { userId, activationCode });
+
+      return conn.QuerySingle<bool>("SELECT IsActive FROM [user] WHERE UserId = @userId", new { userId });
     }
   }
 }

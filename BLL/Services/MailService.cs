@@ -10,10 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
+using System.Net;
 
 namespace BLL.Services {
   public class MailService(IOptions<MailSettings> mailSettings) {
-    public bool SendMail(MailData mailData) {
+    public async Task<bool> SendMail(MailData mailData) {
       try {
         //MimeMessage - a class from Mimekit
         MimeMessage email_Message = new();
@@ -23,15 +24,17 @@ namespace BLL.Services {
         email_Message.To.Add(email_To);
         email_Message.Subject = mailData.EmailSubject;
         BodyBuilder emailBodyBuilder = new() {
-          TextBody = mailData.EmailBody
+          HtmlBody = mailData.EmailHTMLBody,
+          TextBody = mailData.EmailTextBody
         };
         email_Message.Body = emailBodyBuilder.ToMessageBody();
         //this is the SmtpClient class from the Mailkit.Net.Smtp namespace, not the System.Net.Mail one
         SmtpClient MailClient = new ();
-        MailClient.Connect(mailSettings.Value.Host, mailSettings.Value.Port, mailSettings.Value.UseSSL);
-        MailClient.Authenticate(mailSettings.Value.EmailId, mailSettings.Value.Password);
-        MailClient.Send(email_Message);
-        MailClient.Disconnect(true);
+        await MailClient.ConnectAsync(mailSettings.Value.Host, mailSettings.Value.Port, mailSettings.Value.UseSSL).ConfigureAwait(false);
+        await MailClient.AuthenticateAsync(mailSettings.Value.EmailId, mailSettings.Value.Password).ConfigureAwait(false);
+                Console.WriteLine(email_Message);
+        await MailClient.SendAsync(email_Message).ConfigureAwait(false);
+        await MailClient.DisconnectAsync(true).ConfigureAwait(false);
         MailClient.Dispose();
         return true;
       } catch (Exception ex) {
@@ -40,12 +43,16 @@ namespace BLL.Services {
         return false;
       }
     }
+
+    public async Task<bool> SendValidation(string email, int userId, string activationCode) {
+      MailData mailData = new() {
+        EmailToName = email,
+        EmailToId = email,
+        EmailSubject = "Activation du compte resultats.be",
+        EmailHTMLBody = "<a href='http://localhost:4200/activation/?ActivationCode=" + WebUtility.UrlEncode(activationCode) + "&UserId="+userId+"'>Cliquez pour activer votre compte résultats.be</a>",
+        //EmailTextBody = "<a href='http://localhost:4200/activation/" + activationCode+"'>Cliquez pour activer votre compte</a>"
+      };
+      return await SendMail(mailData);
+    }
   }
 } 
-
-//{
-//  "emailToId": "hubert.vromman@gmail.com",
-//  "emailToName": "hub",
-//  "emailSubject": "test",
-//  "emailBody": "coucou"
-//  }

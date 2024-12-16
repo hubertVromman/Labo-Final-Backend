@@ -8,17 +8,24 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace BLL.Services {
-  public class UserService(UserRepo ur, RunnerRepo rr) {
+  public class UserService(UserRepo ur, RunnerRepo rr, MailService ms) {
 
-    public void Register(string email, string password, string firstname, string lastname) {
+    public bool Register(string email, string password, string firstname, string lastname) {
       password = password.HashTo64();
       Runner r = rr.GetRunnerByName(firstname, lastname) ?? rr.AddRunner(firstname, lastname);
-      ur.AddUser(email, password, r.RunnerId);
+      string activationCode = RNG(20);
+      int userId = ur.AddUser(email, password, r.RunnerId, activationCode);
+      if (userId > 0) {
+        _ = ms.SendValidation(email, userId, activationCode);
+      }
+      return userId > 0;
     }
 
     public Token Login(string email, string password) {
       password = password.HashTo64();
       FullUser fu = ur.GetFullUserByEmailAndPassword(email, password) ?? throw new Exception("Mauvais email ou mot de passe");
+      if (!fu.IsActive)
+        throw new Exception("Utilisateur pas encore activé, veuillez vérifier vos mails");
       return GenerateTokensFromUser(fu);
     }
 
@@ -58,8 +65,8 @@ namespace BLL.Services {
       return handler.WriteToken(token);
     }
 
-    public string GenerateRefreshToken() {
-      var randomNumber = new byte[32];
+    public string RNG(int size) {
+      var randomNumber = new byte[size];
       using var rng = RandomNumberGenerator.Create();
       rng.GetBytes(randomNumber);
       return Convert.ToBase64String(randomNumber);
@@ -69,7 +76,7 @@ namespace BLL.Services {
 
       Token t = new Token() {
         AccessToken = GenerateAccessToken(fu),
-        RefreshToken = GenerateRefreshToken(),
+        RefreshToken = RNG(32),
       };
 
       ur.SaveToken(t.AccessToken, t.RefreshToken, fu.UserId);
@@ -93,6 +100,10 @@ namespace BLL.Services {
 
     public bool ChangeAnonymous(int userId, bool isAnonymous) {
       return ur.ChangeAnonymous(userId, isAnonymous);
+    }
+
+    public bool Activate(int userId, string activationCode) {
+      return ur.Activate(userId, activationCode);
     }
   }
 }
