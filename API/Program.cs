@@ -3,6 +3,7 @@ using API.Tools;
 using BLL.Services;
 using DAL.Repositories;
 using Dapper;
+using Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
@@ -17,12 +18,15 @@ namespace API {
       // Add services to the container.
       builder.Services.AddTransient<SqlConnection>(sp =>
           new SqlConnection(builder.Configuration.GetConnectionString("default")));
+      builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
       builder.Services.AddScoped<UserService>();
       builder.Services.AddScoped<RaceService>();
       builder.Services.AddScoped<RunnerService>();
       builder.Services.AddScoped<ResultService>();
       builder.Services.AddScoped<LocalityService>();
+
+      builder.Services.AddScoped<MailService>();
 
       builder.Services.AddScoped<UserRepo>();
       builder.Services.AddScoped<RaceRepo>();
