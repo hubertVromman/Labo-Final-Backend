@@ -23,7 +23,7 @@ namespace DAL.Repositories {
     }
 
     public FullUser? GetFullUserFromToken(string accessToken, string refreshToken) {
-      return conn.QuerySingleOrDefault<FullUser>("SELECT * FROM fulluser WHERE RefreshToken = @refreshToken AND AccessToken = @accessToken AND RefreshTokenExpiration > GETDATE()", new { accessToken, refreshToken });
+      return conn.QuerySingleOrDefault<FullUser>("SELECT * FROM [user] JOIN runner ON runner.RunnerId = [user].RunnerId WHERE RefreshToken = @refreshToken AND AccessToken = @accessToken AND RefreshTokenExpiration > GETDATE()", new { accessToken, refreshToken });
     }
 
     public void SaveToken(string accessToken, string refreshToken, int userId, bool updateExpiration = true) {
@@ -48,6 +48,11 @@ namespace DAL.Repositories {
     public FullUser? GetByName(string firstname, string lastname) {
       string sql = "SELECT * FROM [fulluser] WHERE Firstname = @firstname AND Lastname = @lastname";
       return conn.QuerySingleOrDefault<FullUser>(sql, new { firstname, lastname });
+    }
+
+    public bool ChangeAnonymous(int userId, bool isAnonymous) {
+      string sql = "UPDATE r SET r.IsAnonymous = @isAnonymous FROM runner r JOIN [user] u ON u.RunnerId = r.RunnerId WHERE u.UserId = @userId";
+      return conn.Execute(sql, new { userId, isAnonymous }) > 0;
     }
   }
 }

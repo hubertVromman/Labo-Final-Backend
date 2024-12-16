@@ -59,14 +59,30 @@ namespace API.Controllers {
     [Authorize("UserRequired")]
     [HttpGet("Profile")]
     public IActionResult GetUserInfo() {
-      string? tokenFromRequest = HttpContext.Request.Headers["Authorization"];
+      string? tokenFromRequest = HttpContext.Request.Headers.Authorization;
       if (tokenFromRequest is null)
         return Unauthorized();
-      string token = tokenFromRequest.Substring(7, tokenFromRequest.Length - 7);
+      string token = tokenFromRequest[7..];
       JwtSecurityToken jwt = new JwtSecurityToken(token);
       string email = jwt.Claims.First(x => x.Type == ClaimTypes.Email).Value;
       try {
         return Ok(us.GetByEmail(email));
+      } catch (ArgumentException ex) {
+        return NotFound(ex.Message);
+      }
+    }
+
+    [Authorize("UserRequired")]
+    [HttpPost("Anonymous")]
+    public IActionResult ChangeAnonymous([FromBody] AnonymousForm af) {
+      string? tokenFromRequest = HttpContext.Request.Headers.Authorization;
+      if (tokenFromRequest is null)
+        return Unauthorized();
+      string token = tokenFromRequest[7..];
+      JwtSecurityToken jwt = new(token);
+      int userId = int.Parse(jwt.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+      try {
+        return Ok(us.ChangeAnonymous(userId, af.IsAnonymous));
       } catch (ArgumentException ex) {
         return NotFound(ex.Message);
       }

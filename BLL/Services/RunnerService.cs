@@ -1,4 +1,5 @@
-﻿using DAL.Repositories;
+﻿using BLL.Tools;
+using DAL.Repositories;
 using Domain.Models;
 
 namespace BLL.Services {
@@ -12,7 +13,7 @@ namespace BLL.Services {
     }
 
     public IEnumerable<Runner> Search(string query) {
-      return rr.Search(query);
+      return rr.Search(query).Where(r => !r.IsAnonymous);
     }
   }
 }

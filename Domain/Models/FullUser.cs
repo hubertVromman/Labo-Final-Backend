@@ -8,5 +8,6 @@
     public string Lastname { get; set; }
     public string Gender { get; set; }
     public int BirthYear { get; set; }
+    public bool IsAnonymous { get; set; }
   }
 }
