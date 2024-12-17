@@ -21,6 +21,18 @@ namespace BLL.Services {
       return userId > 0;
     }
 
+    public bool ForgotPasswordRequest(string email) {
+      string resetPasswordCode = RNG(20);
+      DateTime resetPasswordExpiration = DateTime.Now.AddMinutes(10);
+      int userId = ur.AddResetPasswordCode(email, resetPasswordCode, resetPasswordExpiration);
+      _ = ms.SendResetPassword(email, userId, resetPasswordCode);
+      return userId > 0;
+    }
+
+    public bool ResetPassword(int userId, string resetPasswordCode, string newPassword) {
+      return ur.ResetPassword(userId, resetPasswordCode, newPassword.HashTo64());
+    }
+
     public Token Login(string email, string password) {
       password = password.HashTo64();
       FullUser fu = ur.GetFullUserByEmailAndPassword(email, password) ?? throw new Exception("Mauvais email ou mot de passe");
@@ -44,15 +56,14 @@ namespace BLL.Services {
       //Génération du payload (Body)
       Claim[] myclaims =
       {
-                new Claim(ClaimTypes.NameIdentifier, u.UserId.ToString()),
-                new Claim(ClaimTypes.Email, u.Email),
-                new Claim(ClaimTypes.Role, u.Role),
-                new Claim(ClaimTypes.GivenName, u.Firstname),
-                new Claim(ClaimTypes.Name, u.Lastname),
-            };
+        new Claim(ClaimTypes.NameIdentifier, u.UserId.ToString()),
+        new Claim(ClaimTypes.Email, u.Email),
+        new Claim(ClaimTypes.Role, u.Role),
+        new Claim(ClaimTypes.GivenName, u.Firstname),
+        new Claim(ClaimTypes.Name, u.Lastname),
+      };
 
       //Génération du token
-
       JwtSecurityToken token = new JwtSecurityToken(
           claims: myclaims,
           signingCredentials: credentials,
@@ -60,7 +71,7 @@ namespace BLL.Services {
           issuer: "monapi.com"
       );
 
-      JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+      JwtSecurityTokenHandler handler = new();
 
       return handler.WriteToken(token);
     }

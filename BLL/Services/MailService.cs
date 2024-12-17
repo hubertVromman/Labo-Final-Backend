@@ -1,15 +1,7 @@
 ﻿using Domain.Models;
+using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using Microsoft.Extensions.Options;
-using MimeKit;
-using MailKit.Net.Smtp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MailKit.Net.Smtp;
 using System.Net;
 
 namespace BLL.Services {
@@ -29,16 +21,16 @@ namespace BLL.Services {
         };
         email_Message.Body = emailBodyBuilder.ToMessageBody();
         //this is the SmtpClient class from the Mailkit.Net.Smtp namespace, not the System.Net.Mail one
-        SmtpClient MailClient = new ();
+        SmtpClient MailClient = new();
         await MailClient.ConnectAsync(mailSettings.Value.Host, mailSettings.Value.Port, mailSettings.Value.UseSSL).ConfigureAwait(false);
         await MailClient.AuthenticateAsync(mailSettings.Value.EmailId, mailSettings.Value.Password).ConfigureAwait(false);
-                Console.WriteLine(email_Message);
+        Console.WriteLine(email_Message);
         await MailClient.SendAsync(email_Message).ConfigureAwait(false);
         await MailClient.DisconnectAsync(true).ConfigureAwait(false);
         MailClient.Dispose();
         return true;
       } catch (Exception ex) {
-                Console.WriteLine(ex);
+        Console.WriteLine(ex);
         // Exception Details
         return false;
       }
@@ -49,10 +41,21 @@ namespace BLL.Services {
         EmailToName = email,
         EmailToId = email,
         EmailSubject = "Activation du compte resultats.be",
-        EmailHTMLBody = "<a href='http://localhost:4200/activation/?ActivationCode=" + WebUtility.UrlEncode(activationCode) + "&UserId="+userId+"'>Cliquez pour activer votre compte résultats.be</a>",
+        EmailHTMLBody = "<a href='http://localhost:4200/activation/?ActivationCode=" + WebUtility.UrlEncode(activationCode) + "&UserId=" + userId + "'>Cliquez pour activer votre compte résultats.be</a>",
+        //EmailTextBody = "<a href='http://localhost:4200/activation/" + activationCode+"'>Cliquez pour activer votre compte</a>"
+      };
+      return await SendMail(mailData);
+    }
+
+    public async Task<bool> SendResetPassword(string email, int userId, string resetPasswordCode) {
+      MailData mailData = new() {
+        EmailToName = email,
+        EmailToId = email,
+        EmailSubject = "Récupération du mot de passe resultats.be",
+        EmailHTMLBody = "<a href='http://localhost:4200/resetPassword/?ResetPasswordCode=" + WebUtility.UrlEncode(resetPasswordCode) + "&UserId=" + userId + "'>Cliquez pour réinitialiser votre mot de passe résultats.be</a>",
         //EmailTextBody = "<a href='http://localhost:4200/activation/" + activationCode+"'>Cliquez pour activer votre compte</a>"
       };
       return await SendMail(mailData);
     }
   }
-} 
+}

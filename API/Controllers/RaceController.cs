@@ -26,7 +26,7 @@ namespace API.Controllers {
       if (!Directory.Exists(pathToSave))
         Directory.CreateDirectory(pathToSave);
 
-      string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {rf.Distance}km {((DateOnly)rf.StartDate!).Year}.pdf");
+      string fullPath = Path.Combine(pathToSave, $"{rf.RaceName} {rf.Distance}km {( (DateOnly)rf.StartDate! ).Year}.pdf");
       //if (System.IO.File.Exists(fullPath)) {
       //  return BadRequest(new { error = "Race already added" });
       //}

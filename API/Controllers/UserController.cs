@@ -3,18 +3,21 @@ using API.Models.Forms;
 using BLL.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace API.Controllers {
-  [Route("api/[controller]")]
+namespace API.Controllers
+{
+    [Route("api/[controller]")]
   [ApiController]
   public class UserController(UserService us) : ControllerBase {
 
     [HttpPost("Register")]
     public IActionResult Register([FromBody] RegisterForm form) {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
       try {
         if (us.Register(
@@ -33,7 +36,8 @@ namespace API.Controllers {
 
     [HttpPost("Login")]
     public IActionResult Login([FromBody] LoginForm form) {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
       try {
         return Ok(us.Login(
@@ -47,7 +51,8 @@ namespace API.Controllers {
 
     [HttpPost("RefreshToken")]
     public IActionResult RefreshToken([FromBody] TokenForm form) {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
       try {
         return Ok(us.RefreshToken(
@@ -77,7 +82,8 @@ namespace API.Controllers {
     [Authorize("UserRequired")]
     [HttpPost("Anonymous")]
     public IActionResult ChangeAnonymous([FromBody] AnonymousForm af) {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
       string? tokenFromRequest = HttpContext.Request.Headers.Authorization;
       if (tokenFromRequest is null)
@@ -100,12 +106,33 @@ namespace API.Controllers {
 
     [HttpPost("Activate")]
     public IActionResult Activate([FromBody] ActivationForm af) {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
-      if (us.Activate(((int)af.UserId!), af.ActivationCode!))
+      if (us.Activate(( (int)af.UserId! ), af.ActivationCode!))
         return Ok();
       else
         return BadRequest();
+    }
+
+    [HttpPost("ForgotPassword")]
+    public IActionResult ForgotPassword([FromBody] ForgotPasswordRequest fpr) {
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+      us.ForgotPasswordRequest(fpr.Email);
+      return Ok();
+    }
+
+    [HttpPost("ResetPassword")]
+    public IActionResult ResetPassword([FromBody] ResetPasswordForm rpf) {
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+      if (us.ResetPassword((int)rpf.UserId!, rpf.ResetPasswordCode!, rpf.NewPassword!)) {
+        return Ok();
+      }
+      return BadRequest();
     }
 
     [HttpHead("CheckEmail/{email}")]
@@ -116,7 +143,8 @@ namespace API.Controllers {
 
     [HttpHead("CheckName")]
     public IActionResult CheckEmail([FromQuery] NameForm nf) {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
       FullUser? u = us.GetByName(nf.Firstname!, nf.Lastname!);
       return u is not null ? Ok() : NotFound();

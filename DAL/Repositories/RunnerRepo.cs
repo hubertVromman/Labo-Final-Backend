@@ -3,7 +3,6 @@ using Dapper;
 using Domain.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Text.Json;
 
 namespace DAL.Repositories {
   public class RunnerRepo(SqlConnection conn) {

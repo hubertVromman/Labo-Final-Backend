@@ -108,9 +108,9 @@ namespace BLL.Services {
                     time = $"00:{time}";
                   parsedTime = TimeOnly.Parse(time);
                   if (parsedTime > new TimeOnly(0, 0, 30)) {
-                    speed = (Decimal)race.RealDistance / ((Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600);
-                    int minutes = (int)(60M / speed);
-                    int seconds = (int)(60 * (60 - minutes * speed) / speed);
+                    speed = (Decimal)race.RealDistance / ( (Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600 );
+                    int minutes = (int)( 60M / speed );
+                    int seconds = (int)( 60 * ( 60 - minutes * speed ) / speed );
                     pace = $"{minutes}:{seconds:00}";
                   } else {
                     parsedTime = null;

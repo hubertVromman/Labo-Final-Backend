@@ -9,8 +9,15 @@ namespace DAL.Repositories {
       //string sql = "INSERT INTO [user] (Email, Password, RunnerId) " +
       //    "VALUES (@email, @password, @runnerId)";
       int userId = conn.QuerySingle<int>("Register", new { email, password, runnerId, activationCode }, commandType: CommandType.StoredProcedure);
-            Console.WriteLine(userId);
       return userId;
+    }
+
+    public int AddResetPasswordCode(string email, string resetPasswordCode, DateTime resetPasswordExpiration) {
+      return conn.QuerySingle<int>("UPDATE [user] SET ResetPasswordCode = @resetPasswordCode, ResetPasswordExpiration = @resetPasswordExpiration OUTPUT inserted.UserId WHERE Email = @email AND IsActive = 1", new { email, resetPasswordCode, resetPasswordExpiration });
+    }
+
+    public bool ResetPassword(int userId, string resetPasswordCode, string newPassword) {
+      return conn.Execute("ResetPassword", new { userId, resetPasswordCode, newPassword }, commandType: CommandType.StoredProcedure) > 0;
     }
 
     public IEnumerable<User> GetAll() {

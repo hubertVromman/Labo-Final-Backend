@@ -2,13 +2,13 @@
 using Domain.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Text.Json;
 
 namespace DAL.Repositories {
   public class RaceRepo(SqlConnection conn) {
     public Race AddRaceIfNotExist(Race r) {
       Race? race = conn.QuerySingleOrDefault<Race>("SELECT TOP 1 * FROM race WHERE RaceName = @raceName AND StartDate = @startDate AND Distance = @distance", r);
-      if (race is not null) throw new Exception("Race already exists");
+      if (race is not null)
+        throw new Exception("Race already exists");
 
       string sql = "INSERT INTO race (RaceName, Place, StartDate, RaceType, Distance, RealDistance) " +
           "VALUES (@raceName, @place, @startDate, @raceType, @distance, @realDistance)";
