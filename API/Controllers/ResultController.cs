@@ -15,11 +15,11 @@ namespace API.Controllers {
     }
 
     [HttpGet("ByRace/{raceId}")]
-    public IActionResult GetByRaceId(int raceId, [FromQuery] PaginationForm pf) {
+    public IActionResult GetByRaceId(int raceId, [FromQuery] PaginationForm pf, [FromQuery] FilterForm ff) {
       if (!ModelState.IsValid)
         return BadRequest(ModelState);
 
-      ObjectList<Result> results = rs.GetByRaceId(raceId, (int)pf.Offset!, (int)pf.Limit!);
+      ObjectList<Result> results = rs.GetByRaceId(raceId, (int)pf.Offset!, (int)pf.Limit!, ff.Name);
       return Ok(results);
     }
   }

@@ -14,6 +14,7 @@ namespace API.Controllers {
     public ActionResult AddRace(RaceForm rf) {
       if (!ModelState.IsValid)
         return BadRequest(ModelState);
+            Console.WriteLine(rf.RealDistance);
       Race race;
       try {
         race = rs.AddRaceIfNotExist(rf.ToDomain());

@@ -6,6 +6,7 @@ using System.Data;
 namespace DAL.Repositories {
   public class RaceRepo(SqlConnection conn) {
     public Race AddRaceIfNotExist(Race r) {
+            Console.WriteLine(r.RealDistance);
       Race? race = conn.QuerySingleOrDefault<Race>("SELECT TOP 1 * FROM race WHERE RaceName = @raceName AND StartDate = @startDate AND Distance = @distance", r);
       if (race is not null)
         throw new Exception("Race already exists");
@@ -37,7 +38,7 @@ namespace DAL.Repositories {
     }
 
     public IEnumerable<Race> Search(string query) {
-      string[] fragments = query.Split(' ');
+      string[] fragments = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
       string sql = "SELECT * FROM race WHERE";
 
@@ -45,7 +46,7 @@ namespace DAL.Repositories {
       for (int i = 0; i < fragments.Length; i++) {
         parameters.Add("fragment" + i, "%" + fragments[i] + "%", DbType.String, ParameterDirection.Input, fragments[i].Length + 2);
         if (i > 0)
-          sql += " OR ";
+          sql += " AND ";
         sql += " RaceName LIKE @fragment" + i;
       }
       return conn.Query<Race>(sql, parameters);

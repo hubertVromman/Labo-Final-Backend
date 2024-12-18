@@ -3,6 +3,7 @@ using Dapper;
 using Domain.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.Json;
 
 namespace DAL.Repositories {
   public class RunnerRepo(SqlConnection conn) {
@@ -28,7 +29,7 @@ namespace DAL.Repositories {
     }
 
     public IEnumerable<Runner> Search(string query) {
-      string[] fragments = query.Split(' ');
+      string[] fragments = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
       string sql = "SELECT * FROM runner WHERE";
 
@@ -36,9 +37,9 @@ namespace DAL.Repositories {
       for (int i = 0; i < fragments.Length; i++) {
         parameters.Add("fragment" + i, fragments[i] + "%", DbType.String, ParameterDirection.Input, fragments[i].Length + 1);
         if (i > 0)
-          sql += " OR ";
-        sql += " Lastname LIKE @fragment" + i;
-        sql += " OR Firstname LIKE @fragment" + i;
+          sql += " AND ";
+        sql += " (Lastname LIKE @fragment" + i;
+        sql += " OR Firstname LIKE @fragment" + i + ")";
       }
       return conn.Query<Runner>(sql, parameters);
     }
