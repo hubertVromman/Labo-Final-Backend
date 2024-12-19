@@ -6,7 +6,6 @@ using System.Data;
 namespace DAL.Repositories {
   public class RaceRepo(SqlConnection conn) {
     public Race AddRaceIfNotExist(Race r) {
-            Console.WriteLine(r.RealDistance);
       Race? race = conn.QuerySingleOrDefault<Race>("SELECT TOP 1 * FROM race WHERE RaceName = @raceName AND StartDate = @startDate AND Distance = @distance", r);
       if (race is not null)
         throw new Exception("Race already exists");
@@ -25,7 +24,7 @@ namespace DAL.Repositories {
     }
 
     public ObjectList<Race> GetByDate(int offset, int limit) {
-      string sql = "SELECT * FROM race ORDER BY StartDate DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
+      string sql = "SELECT * FROM race ORDER BY StartDate DESC, Distance DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
       IEnumerable<Race> raceList = conn.Query<Race>(sql, new { offset, limit });
       sql = "SELECT COUNT(1) FROM race";
       int count = conn.QuerySingle<int>(sql);

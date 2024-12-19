@@ -55,7 +55,7 @@ namespace BLL.Services {
           }
 
           for (int i = 0; i < parsedLines.Count; i++) {
-            if (parsedLines[i].ItemCount <= 3) {
+            if (parsedLines[i].ItemCount <= 4) {
               parsedLines.RemoveAt(i);
               i--;
             }
@@ -156,6 +156,8 @@ namespace BLL.Services {
                 resultInfo.Firstname = Capitalize(resultInfo.Firstname.Trim().Trim('*'));
                 resultInfo.Lastname = Capitalize(resultInfo.Lastname.Trim().Trim('*'));
 
+                                Console.WriteLine(resultInfo.Lastname);
+
                 resultInfo.RunnerId = AddRunnerIfNotExist(resultInfo);
                 rer.AddResult(resultInfo);
                 resultNumber++;
@@ -172,8 +174,8 @@ namespace BLL.Services {
     }
 
     private string Capitalize(string input) {
-      string result = string.Join("-", input.Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..].ToLower()));
-      result = string.Join(" ", input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..]));
+      string result = string.Join("-", input.Split('-', StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..].ToLower()));
+      result = string.Join(" ", result.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(c => char.ToUpper(c[0]) + c[1..]));
       return result;
     }
 
