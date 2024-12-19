@@ -19,13 +19,19 @@ namespace DAL.Repositories {
     }
 
     public Runner AddRunner(string firstname, string lastname, string? gender = null) {
-
       string sql = "INSERT INTO runner (Firstname, Lastname, Gender) " +
           "VALUES (@firstname, @lastname, @gender)";
 
       conn.Execute(sql, new { firstname, lastname, gender });
 
       return GetRunnerByName(firstname, lastname)!;
+    }
+
+    public void UpdateRunnerGender(int runnerId, string gender) {
+      string sql = "UPDATE runner SET Gender = @gender " +
+          "WHERE RunnerId = @runnerId";
+
+      conn.Execute(sql, new { runnerId, gender });
     }
 
     public IEnumerable<Runner> Search(string query) {

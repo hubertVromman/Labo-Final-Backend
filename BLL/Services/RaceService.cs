@@ -43,18 +43,25 @@ namespace BLL.Services {
                 Position = position,
                 Text = text,
               });
+              newLine.ItemCount++;
+            }
+            for (int i = 0; i < words.Length; i++) {
+              newLine.Items.Add(new Item() {
+                Position = words[i].BoundingBox.Left,
+                Text = words[i].Text,
+              });
             }
             parsedLines.Add(newLine);
           }
 
           for (int i = 0; i < parsedLines.Count; i++) {
-            if (parsedLines[i].Items.Count <= 3) {
+            if (parsedLines[i].ItemCount <= 3) {
               parsedLines.RemoveAt(i);
               i--;
             }
           }
 
-          string[] generalRankLabels = ["place", "general", "rang"];
+          string[] generalRankLabels = ["place", "general", "rang", "ran"];
           double generalRankPosition = FindPosition(parsedLines[0].Items, generalRankLabels)
               ?? throw new Exception("Parsing error: GeneralRank not found");
 
@@ -72,7 +79,7 @@ namespace BLL.Services {
                  ?? throw new Exception("Parsing error: Firstname and Names not found");
           }
 
-          string[] genderLabels = ["sexe", "mf"];
+          string[] genderLabels = ["sexe", "mf", "m f"];
           double genderPosition = FindPosition(parsedLines[0].Items, genderLabels)
               ?? throw new Exception("Parsing error: Gender not found");
 
@@ -88,9 +95,10 @@ namespace BLL.Services {
               foreach (var line in parsedLines) {
                 string generalRankShown = line.FindItemByPosition(generalRankPosition)!.Text.Trim().Trim('.').Trim(')');
                 string? time = line.FindItemByPosition(timePosition)?.Text;
-                string? gender = line.FindItemByPosition(genderPosition)!.Text;
-                int? genderRank;
-                if (gender.Contains('m') || gender.Contains('M')) {
+                string? gender = line.FindItemByPosition(genderPosition)?.Text;
+                int? genderRank = null;
+                if (gender is null) {
+                } else if (gender.Contains('m') || gender.Contains('M')) {
                   gender = "M";
                   genderRank = maleRank++;
                 } else if (gender.Contains('f') || gender.Contains('F')) {
@@ -106,7 +114,8 @@ namespace BLL.Services {
                 if (time is not null && char.ToLower(generalRankShown[0]) != 'd' && char.ToLower(time[0]) != 'd') {
                   if (time.Length == 5)
                     time = $"00:{time}";
-                  parsedTime = TimeOnly.Parse(time);
+                 if (TimeOnly.TryParse(time, out TimeOnly tempParsedTime)) {
+                  parsedTime = tempParsedTime;
                   if (parsedTime > new TimeOnly(0, 0, 30)) {
                     speed = (Decimal)race.RealDistance / ( (Decimal)parsedTime.Value.Hour + (Decimal)parsedTime.Value.Minute / 60 + (Decimal)parsedTime.Value.Second / 3600 );
                     int minutes = (int)( 60M / speed );
@@ -115,12 +124,18 @@ namespace BLL.Services {
                   } else {
                     parsedTime = null;
                   }
+                  }
                 }
                 string lastname, firstname;
                 if (namesPosition is not null) {
                   string names = line.FindItemByPosition((double)namesPosition)!.Text;
-                  lastname = names[..names.LastIndexOf(' ')];
-                  firstname = names[names.LastIndexOf(' ')..];
+                  if (!names.Contains(' ')) {
+                    lastname = names;
+                    firstname = "";
+                  } else {
+                    lastname = names[..names.LastIndexOf(' ')];
+                    firstname = names[names.LastIndexOf(' ')..];
+                  }
                 } else {
                   lastname = line.FindItemByPosition((double)lastnamePosition!)!.Text;
                   firstname = line.FindItemByPosition((double)firstnamePosition!)!.Text;
@@ -165,6 +180,8 @@ namespace BLL.Services {
     public int AddRunnerIfNotExist(ResultForm resultInfo) {
       Runner? runner = rur.GetRunnerByName(resultInfo.Firstname, resultInfo.Lastname);
       if (runner != null) {
+        if (runner.Gender is null)
+          rur.UpdateRunnerGender(runner.RunnerId, resultInfo.Gender);
         return runner.RunnerId;
       } else {
         return rur.AddRunner(resultInfo.Firstname, resultInfo.Lastname, resultInfo.Gender).RunnerId;
